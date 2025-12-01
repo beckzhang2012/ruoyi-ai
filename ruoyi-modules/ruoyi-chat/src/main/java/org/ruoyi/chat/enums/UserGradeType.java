@@ -18,6 +18,15 @@ public enum UserGradeType {
         this.description = description;
     }
 
+    // 手动添加getter方法
+    public String getCode() {
+        return code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public static UserGradeType fromCode(String code) {
         for (UserGradeType type : values()) {
             if (type.getCode().equals(code)) {

@@ -18,5 +18,14 @@ public enum promptTemplateEnum {
     private final Integer code;
     private final String desc;
 
+    // 手动添加getter方法
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
 }
 

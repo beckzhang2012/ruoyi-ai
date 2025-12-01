@@ -2,6 +2,8 @@ package org.ruoyi.chat.service.chat.proxy;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ruoyi.chat.service.chat.IChatCostService;
 import org.ruoyi.chat.service.chat.IChatService;
 import org.ruoyi.common.chat.entity.chat.Message;
@@ -23,6 +25,7 @@ import java.util.function.Consumer;
 @Slf4j
 @RequiredArgsConstructor
 public class BillingChatServiceProxy implements IChatService {
+    private static final Logger log = LoggerFactory.getLogger(BillingChatServiceProxy.class);
 
     private final IChatService delegate;
     private final IChatCostService chatCostService;
