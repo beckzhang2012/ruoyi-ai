@@ -3,7 +3,8 @@ package org.ruoyi.controller;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.commons.lang3.StringUtils;
-import org.ruoyi.core.annotation.Log;
+import org.ruoyi.common.log.annotation.Log;
+import org.ruoyi.common.log.enums.BusinessType;
 import org.ruoyi.core.controller.BaseController;
 import org.ruoyi.core.domain.R;
 import org.ruoyi.core.page.TableDataInfo;
@@ -76,7 +77,7 @@ public class AiUsageStatisticsController extends BaseController {
      */
     @PutMapping
     @Log(title = "AI使用统计", businessType = BusinessType.UPDATE)
-    public R<Boolean> edit(@Validated(AiUsageStatisticsBo.EditGroup.class) @RequestBody AiUsageStatisticsBo bo) {
+    public R<Boolean> edit(@Validated(EditGroup.class) @RequestBody AiUsageStatisticsBo bo) {
         return R.ok(aiUsageStatisticsService.updateByBo(bo));
     }
 

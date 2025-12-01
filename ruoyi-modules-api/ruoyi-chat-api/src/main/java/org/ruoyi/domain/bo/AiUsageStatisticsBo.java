@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import org.ruoyi.core.domain.BaseEntity;
 import org.ruoyi.common.core.validate.AddGroup;
 import org.ruoyi.common.core.validate.EditGroup;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -86,9 +88,12 @@ public class AiUsageStatisticsBo extends BaseEntity {
     /**
      * 映射转换
      */
+    @Mapper
     public interface AiUsageStatisticsBoMapper {
         AiUsageStatisticsBo toBo(AiUsageStatistics entity);
         AiUsageStatistics toEntity(AiUsageStatisticsBo bo);
     }
+
+    public static final AiUsageStatisticsBoMapper INSTANCE = Mappers.getMapper(AiUsageStatisticsBoMapper.class);
 
 }

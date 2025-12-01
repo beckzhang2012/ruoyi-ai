@@ -92,7 +92,7 @@ public class AiUsageStatisticsServiceImpl implements IAiUsageStatisticsService {
      */
     @Override
     public Boolean insertByBo(AiUsageStatisticsBo bo) {
-        AiUsageStatistics entity = bo.toEntity();
+        AiUsageStatistics entity = AiUsageStatisticsBo.INSTANCE.toEntity(bo);
         return baseMapper.insert(entity) > 0;
     }
 
@@ -104,7 +104,7 @@ public class AiUsageStatisticsServiceImpl implements IAiUsageStatisticsService {
      */
     @Override
     public Boolean updateByBo(AiUsageStatisticsBo bo) {
-        AiUsageStatistics entity = bo.toEntity();
+        AiUsageStatistics entity = AiUsageStatisticsBo.INSTANCE.toEntity(bo);
         return baseMapper.updateById(entity) > 0;
     }
 
