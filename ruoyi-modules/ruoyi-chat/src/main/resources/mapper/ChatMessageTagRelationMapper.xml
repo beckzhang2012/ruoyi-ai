@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.chat.mapper.ChatMessageTagRelationMapper">
+
+    <resultMap type="org.ruoyi.chat.domain.ChatMessageTagRelation" id="ChatMessageTagRelationResult">
+        <result property="relationId" column="relation_id"/>
+        <result property="tagId" column="tag_id"/>
+        <result property="messageId" column="message_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 查询消息标签关系列表（按消息ID） -->
+    <select id="selectChatMessageTagRelationListByMessageId" parameterType="Long" resultMap="ChatMessageTagRelationResult">
+        select relation_id, tag_id, message_id, create_time
+        from chat_message_tag_relation
+        where message_id = #{messageId}
+        order by create_time desc
+    </select>
+
+    <!-- 查询消息标签关系列表（按标签ID） -->
+    <select id="selectChatMessageTagRelationListByTagId" parameterType="Long" resultMap="ChatMessageTagRelationResult">
+        select relation_id, tag_id, message_id, create_time
+        from chat_message_tag_relation
+        where tag_id = #{tagId}
+        order by create_time desc
+    </select>
+
+    <!-- 查询消息标签关系（按消息ID和标签ID） -->
+    <select id="selectChatMessageTagRelationByMessageIdAndTagId" parameterType="map" resultMap="ChatMessageTagRelationResult">
+        select relation_id, tag_id, message_id, create_time
+        from chat_message_tag_relation
+        where message_id = #{messageId} and tag_id = #{tagId}
+    </select>
+
+    <!-- 查询消息标签关系（按ID） -->
+    <select id="selectChatMessageTagRelationById" parameterType="Long" resultMap="ChatMessageTagRelationResult">
+        select relation_id, tag_id, message_id, create_time
+        from chat_message_tag_relation
+        where relation_id = #{relationId}
+    </select>
+
+    <!-- 新增消息标签关系 -->
+    <insert id="insertChatMessageTagRelation" parameterType="org.ruoyi.chat.domain.ChatMessageTagRelation">
+        insert into chat_message_tag_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tagId != null">tag_id,</if>
+            <if test="messageId != null">message_id,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tagId != null">#{tagId},</if>
+            <if test="messageId != null">#{messageId},</if>
+            now()
+        </trim>
+    </insert>
+
+    <!-- 批量新增消息标签关系 -->
+    <insert id="batchInsertChatMessageTagRelation" parameterType="java.util.List">
+        insert into chat_message_tag_relation (tag_id, message_id, create_time)
+        values
+        <foreach item="relation" collection="list" separator=",">
+            (#{relation.tagId}, #{relation.messageId}, now())
+        </foreach>
+    </insert>
+
+    <!-- 删除消息标签关系（按ID） -->
+    <delete id="deleteChatMessageTagRelationById" parameterType="Long">
+        delete from chat_message_tag_relation
+        where relation_id = #{relationId}
+    </delete>
+
+    <!-- 删除消息标签关系（按消息ID） -->
+    <delete id="deleteChatMessageTagRelationByMessageId" parameterType="Long">
+        delete from chat_message_tag_relation
+        where message_id = #{messageId}
+    </delete>
+
+    <!-- 删除消息标签关系（按标签ID） -->
+    <delete id="deleteChatMessageTagRelationByTagId" parameterType="Long">
+        delete from chat_message_tag_relation
+        where tag_id = #{tagId}
+    </delete>
+
+    <!-- 删除消息标签关系（按消息ID和标签ID） -->
+    <delete id="deleteChatMessageTagRelationByMessageIdAndTagId" parameterType="map">
+        delete from chat_message_tag_relation
+        where message_id = #{messageId} and tag_id = #{tagId}
+    </delete>
+
+    <!-- 批量删除消息标签关系 -->
+    <delete id="deleteChatMessageTagRelationByIds" parameterType="String">
+        delete from chat_message_tag_relation
+        where relation_id in
+        <foreach item="relationId" collection="array" open="(" separator="," close=")">
+            #{relationId}
+        </foreach>
+    </delete>
+
+    <!-- 查询消息ID集合（按标签ID） -->
+    <select id="selectMessageIdsByTagId" parameterType="Long" resultType="Long">
+        select message_id
+        from chat_message_tag_relation
+        where tag_id = #{tagId}
+    </select>
+
+    <!-- 查询消息ID集合（按标签ID列表） -->
+    <select id="selectMessageIdsByTagIds" parameterType="java.util.List" resultType="Long">
+        select message_id
+        from chat_message_tag_relation
+        where tag_id in
+        <foreach item="tagId" collection="list" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
+        group by message_id
+    </select>
+
+</mapper>

@@ -29,4 +29,13 @@ public enum ChatModeType {
         this.description = description;
     }
 
+    // 手动添加getter方法
+    public String getCode() {
+        return code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
 }
