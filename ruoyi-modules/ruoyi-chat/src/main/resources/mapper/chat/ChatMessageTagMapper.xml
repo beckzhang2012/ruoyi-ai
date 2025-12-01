@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.chat.mapper.ChatMessageTagMapper">
+
+    <resultMap type="org.ruoyi.chat.domain.entity.ChatMessageTag" id="ChatMessageTagResult">
+        <id     property="id"         column="id"         />
+        <result property="tagName"     column="tag_name"   />
+        <result property="tagColor"    column="tag_color"  />
+        <result property="userId"      column="user_id"    />
+        <result property="sort"        column="sort"       />
+        <result property="remark"      column="remark"     />
+        <result property="createTime"  column="create_time"/>
+        <result property="updateTime"  column="update_time"/>
+    </resultMap>
+
+    <sql id="selectChatMessageTagVo">
+        select id, tag_name, tag_color, user_id, sort, remark, create_time, update_time from chat_message_tag
+    </sql>
+
+    <select id="selectUserTags" parameterType="Long" resultMap="ChatMessageTagResult">
+        <include refid="selectChatMessageTagVo"/>
+        where user_id = #{userId}
+        order by sort asc, create_time desc
+    </select>
+
+</mapper>
