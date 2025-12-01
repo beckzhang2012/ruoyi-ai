@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.chat.mapper.AiUsageStatisticsMapper">
+
+    <resultMap type="org.ruoyi.chat.domain.vo.AiUsageStatisticsVo" id="AiUsageStatisticsVoResult">
+        <result property="id" column="id"/>
+        <result property="statDate" column="stat_date"/>
+        <result property="statType" column="stat_type"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="modelName" column="model_name"/>
+        <result property="conversationCount" column="conversation_count"/>
+        <result property="messageCount" column="message_count"/>
+        <result property="totalTokens" column="total_tokens"/>
+        <result property="totalCost" column="total_cost"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 查询用户使用统计数据 -->
+    <select id="queryUserUsageStatistics" resultMap="AiUsageStatisticsVoResult">
+        SELECT
+            DATE_FORMAT(cm.create_time, '%Y-%m-%d') AS stat_date,
+            'user' AS stat_type,
+            cm.user_id AS user_id,
+            u.nick_name AS user_name,
+            COUNT(DISTINCT cm.session_id) AS conversation_count,
+            COUNT(cm.id) AS message_count,
+            SUM(cm.total_tokens) AS total_tokens,
+            SUM(cm.cost) AS total_cost
+        FROM
+            chat_message cm
+        LEFT JOIN
+            sys_user u ON cm.user_id = u.user_id
+        WHERE
+            1 = 1
+            <if test="bo.statDateStart != null">
+                AND cm.create_time >= #{bo.statDateStart}
+            </if>
+            <if test="bo.statDateEnd != null">
+                AND cm.create_time <= #{bo.statDateEnd}
+            </if>
+            <if test="bo.userId != null">
+                AND cm.user_id = #{bo.userId}
+            </if>
+        GROUP BY
+            DATE_FORMAT(cm.create_time, '%Y-%m-%d'),
+            cm.user_id,
+            u.nick_name
+        ORDER BY
+            stat_date DESC,
+            user_id
+    </select>
+
+    <!-- 查询模型使用统计数据 -->
+    <select id="queryModelUsageStatistics" resultMap="AiUsageStatisticsVoResult">
+        SELECT
+            DATE_FORMAT(cm.create_time, '%Y-%m-%d') AS stat_date,
+            'model' AS stat_type,
+            cm.model_name AS model_name,
+            COUNT(DISTINCT cm.session_id) AS conversation_count,
+            COUNT(cm.id) AS message_count,
+            SUM(cm.total_tokens) AS total_tokens,
+            SUM(cm.cost) AS total_cost
+        FROM
+            chat_message cm
+        WHERE
+            1 = 1
+            <if test="bo.statDateStart != null">
+                AND cm.create_time >= #{bo.statDateStart}
+            </if>
+            <if test="bo.statDateEnd != null">
+                AND cm.create_time <= #{bo.statDateEnd}
+            </if>
+            <if test="bo.modelName != null and bo.modelName != ''">
+                AND cm.model_name = #{bo.modelName}
+            </if>
+        GROUP BY
+            DATE_FORMAT(cm.create_time, '%Y-%m-%d'),
+            cm.model_name
+        ORDER BY
+            stat_date DESC,
+            model_name
+    </select>
+
+    <!-- 查询模型使用趋势数据 -->
+    <select id="queryModelUsageTrend" resultMap="AiUsageStatisticsVoResult">
+        SELECT
+            DATE_FORMAT(cm.create_time, '%Y-%m-%d') AS stat_date,
+            'model_trend' AS stat_type,
+            cm.model_name AS model_name,
+            COUNT(DISTINCT cm.session_id) AS conversation_count,
+            COUNT(cm.id) AS message_count,
+            SUM(cm.total_tokens) AS total_tokens,
+            SUM(cm.cost) AS total_cost
+        FROM
+            chat_message cm
+        WHERE
+            1 = 1
+            <if test="bo.statDateStart != null">
+                AND cm.create_time >= #{bo.statDateStart}
+            </if>
+            <if test="bo.statDateEnd != null">
+                AND cm.create_time <= #{bo.statDateEnd}
+            </if>
+            <if test="bo.modelName != null and bo.modelName != ''">
+                AND cm.model_name = #{bo.modelName}
+            </if>
+        GROUP BY
+            DATE_FORMAT(cm.create_time, '%Y-%m-%d'),
+            cm.model_name
+        ORDER BY
+            stat_date ASC,
+            model_name
+    </select>
+
+</mapper>
