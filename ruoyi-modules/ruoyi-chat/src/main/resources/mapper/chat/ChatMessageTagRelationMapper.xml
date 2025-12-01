@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.chat.mapper.ChatMessageTagRelationMapper">
+
+    <resultMap type="org.ruoyi.chat.domain.entity.ChatMessageTagRelation" id="ChatMessageTagRelationResult">
+        <id     property="id"         column="id"         />
+        <result property="messageId"   column="message_id" />
+        <result property="tagId"       column="tag_id"     />
+        <result property="userId"      column="user_id"    />
+        <result property="createTime"  column="create_time"/>
+    </resultMap>
+
+    <sql id="selectChatMessageTagRelationVo">
+        select id, message_id, tag_id, user_id, create_time from chat_message_tag_relation
+    </sql>
+
+    <select id="selectTagIdsByMessageId" parameterType="Long" resultType="Long">
+        select tag_id from chat_message_tag_relation
+        where message_id = #{messageId}
+        order by create_time desc
+    </select>
+
+    <select id="selectMessageIdsByTagId" parameterType="Long" resultType="Long">
+        select message_id from chat_message_tag_relation
+        where tag_id = #{tagId}
+        order by create_time desc
+    </select>
+
+    <delete id="deleteByMessageId" parameterType="Long">
+        delete from chat_message_tag_relation where message_id = #{messageId}
+    </delete>
+
+    <delete id="deleteByTagId" parameterType="Long">
+        delete from chat_message_tag_relation where tag_id = #{tagId}
+    </delete>
+
+</mapper>
