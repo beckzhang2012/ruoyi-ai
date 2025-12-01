@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.chat.mapper.AiUsageStatisticsMapper">
+
+    <resultMap id="AiUsageStatisticsResult" type="org.ruoyi.chat.domain.entity.AiUsageStatistics">
+        <id     property="id"             column="id"             />
+        <result property="statDate"       column="stat_date"      />
+        <result property="statType"       column="stat_type"      />
+        <result property="userId"         column="user_id"        />
+        <result property="modelName"      column="model_name"     />
+        <result property="conversationCount" column="conversation_count" />
+        <result property="messageCount"   column="message_count"  />
+        <result property="totalTokens"    column="total_tokens"   />
+        <result property="totalCost"      column="total_cost"     />
+        <result property="createTime"     column="create_time"    />
+        <result property="updateTime"     column="update_time"    />
+    </resultMap>
+
+    <sql id="selectAiUsageStatisticsVo">
+        select id, stat_date, stat_type, user_id, model_name, conversation_count, message_count, total_tokens, total_cost, create_time, update_time from ai_usage_statistics
+    </sql>
+
+    <sql id="queryConditions">
+        <where>
+            <if test="query.statType != null and query.statType != ''">
+                AND stat_type = #{query.statType}
+            </if>
+            <if test="query.userId != null">
+                AND user_id = #{query.userId}
+            </if>
+            <if test="query.modelName != null and query.modelName != ''">
+                AND model_name = #{query.modelName}
+            </if>
+            <if test="query.startTime != null">
+                AND stat_date >= #{query.startTime}
+            </if>
+            <if test="query.endTime != null">
+                AND stat_date <= #{query.endTime}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectStatisticsPage" resultMap="AiUsageStatisticsResult">
+        <include refid="selectAiUsageStatisticsVo"/>
+        <include refid="queryConditions"/>
+        order by stat_date desc, id desc
+    </select>
+
+    <select id="selectStatisticsList" resultMap="AiUsageStatisticsResult">
+        <include refid="selectAiUsageStatisticsVo"/>
+        <include refid="queryConditions"/>
+        order by stat_date desc, id desc
+    </select>
+
+    <!-- 按用户统计使用情况 -->
+    <select id="selectUserUsageStatistics" resultType="map">
+        SELECT 
+            user_id,
+            COUNT(DISTINCT session_id) as conversation_count,
+            COUNT(id) as message_count,
+            SUM(total_tokens) as total_tokens,
+            SUM(deduct_cost) as total_cost
+        FROM chat_message
+        <where>
+            create_time >= #{query.startTime}
+            AND create_time <![CDATA[ < ]]> DATE_ADD(#{query.endTime}, INTERVAL 1 DAY)
+            <if test="query.userId != null">
+                AND user_id = #{query.userId}
+            </if>
+        </where>
+        GROUP BY user_id
+        ORDER BY conversation_count desc
+    </select>
+
+    <!-- 按模型统计使用情况 -->
+    <select id="selectModelUsageStatistics" resultType="map">
+        SELECT 
+            model_name,
+            COUNT(DISTINCT session_id) as conversation_count,
+            COUNT(id) as message_count,
+            SUM(total_tokens) as total_tokens,
+            SUM(deduct_cost) as total_cost
+        FROM chat_message
+        <where>
+            model_name is not null
+            AND create_time >= #{query.startTime}
+            AND create_time <![CDATA[ < ]]> DATE_ADD(#{query.endTime}, INTERVAL 1 DAY)
+            <if test="query.modelName != null and query.modelName != ''">
+                AND model_name = #{query.modelName}
+            </if>
+        </where>
+        GROUP BY model_name
+        ORDER BY conversation_count desc
+    </select>
+
+    <!-- 统计用户对话次数 -->
+    <select id="countUserConversations" resultType="map">
+        SELECT 
+            DATE(create_time) as stat_date,
+            COUNT(DISTINCT session_id) as conversation_count
+        FROM chat_message
+        <where>
+            <if test="query.userId != null">
+                AND user_id = #{query.userId}
+            </if>
+            <if test="query.startTime != null">
+                AND create_time >= #{query.startTime}
+            </if>
+            <if test="query.endTime != null">
+                AND create_time <![CDATA[ < ]]> DATE_ADD(#{query.endTime}, INTERVAL 1 DAY)
+            </if>
+        </where>
+        GROUP BY DATE(create_time)
+        ORDER BY stat_date
+    </select>
+
+    <!-- 统计模型使用趋势 -->
+    <select id="selectModelUsageTrend" resultType="map">
+        SELECT 
+            DATE(create_time) as stat_date,
+            model_name,
+            COUNT(DISTINCT session_id) as conversation_count,
+            SUM(total_tokens) as total_tokens,
+            SUM(deduct_cost) as total_cost
+        FROM chat_message
+        <where>
+            model_name is not null
+            <if test="query.modelName != null and query.modelName != ''">
+                AND model_name = #{query.modelName}
+            </if>
+            <if test="query.startTime != null">
+                AND create_time >= #{query.startTime}
+            </if>
+            <if test="query.endTime != null">
+                AND create_time <![CDATA[ < ]]> DATE_ADD(#{query.endTime}, INTERVAL 1 DAY)
+            </if>
+        </where>
+        GROUP BY DATE(create_time), model_name
+        ORDER BY stat_date, model_name
+    </select>
+
+</mapper>
