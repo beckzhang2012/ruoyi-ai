@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.mapper.ChatMessageFavoriteMapper">
+
+    <resultMap type="org.ruoyi.domain.vo.ChatMessageFavoriteVo" id="ChatMessageFavoriteVoResult">
+        <id     property="id"           column="id"           />
+        <result property="userId"       column="user_id"      />
+        <result property="messageId"    column="message_id"   />
+        <result property="sessionId"    column="session_id"   />
+        <result property="remark"       column="remark"       />
+        <result property="messageContent" column="message_content" />
+        <result property="modelName"    column="model_name"   />
+        <result property="sessionTitle" column="session_title" />
+        <result property="role"         column="role"         />
+        <result property="favoriteTime" column="favorite_time" />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+    </resultMap>
+
+    <sql id="selectChatMessageFavoriteVoVo">
+        select id, user_id, message_id, session_id, remark, message_content, model_name, session_title, role, favorite_time, create_by, create_time, update_by, update_time from chat_message_favorite
+    </sql>
+
+    <select id="selectChatMessageFavoriteList" resultMap="ChatMessageFavoriteVoResult">
+        <include refid="selectChatMessageFavoriteVoVo"/>
+        <where>
+            <if test="userId != null and userId != 0">
+                and user_id = #{userId}
+            </if>
+            <if test="modelName != null and modelName != ''">
+                and model_name = #{modelName}
+            </if>
+            <if test="sessionId != null and sessionId != 0">
+                and session_id = #{sessionId}
+            </if>
+            <if test="content != null and content != ''">
+                and message_content like concat('%', #{content}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+</mapper>
