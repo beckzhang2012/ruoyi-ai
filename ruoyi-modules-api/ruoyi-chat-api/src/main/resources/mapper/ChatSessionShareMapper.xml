@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.mapper.ChatSessionShareMapper">
+    <resultMap id="ChatSessionShareVoResult" type="org.ruoyi.domain.vo.ChatSessionShareVo">
+        <id property="id" column="id" />
+        <result property="sessionId" column="session_id" />
+        <result property="sessionName" column="session_name" />
+        <result property="userId" column="user_id" />
+        <result property="userName" column="user_name" />
+        <result property="shareCode" column="share_code" />
+        <result property="password" column="password" />
+        <result property="validHours" column="valid_hours" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="status" column="status" />
+        <result property="statusName" column="status_name" />
+        <result property="viewCount" column="view_count" />
+        <result property="remark" column="remark" />
+        <result property="shareUrl" column="share_url" />
+    </resultMap>
+
+    <sql id="selectChatSessionShareVoVo">
+        select 
+            css.id,
+            css.session_id,
+            cs.title as session_name,
+            css.user_id,
+            u.nick_name as user_name,
+            css.share_code,
+            css.password,
+            css.valid_hours,
+            css.create_time,
+            css.update_time,
+            css.status,
+            case css.status
+                when 0 then '有效'
+                when 1 then '已取消'
+                when 2 then '已过期'
+                else '未知'
+            end as status_name,
+            css.view_count,
+            css.remark,
+            concat('http://localhost:8080/chat/share/', css.share_code) as share_url
+        from chat_session_share css
+        left join chat_session cs on css.session_id = cs.id
+        left join sys_user u on css.user_id = u.id
+        where css.del_flag = 0
+    </sql>
+
+    <select id="selectChatSessionSharePage" resultMap="ChatSessionShareVoResult">
+        <include refid="selectChatSessionShareVoVo" />
+        <where>
+            <if test="share.id != null">
+                and css.id = #{share.id}
+            </if>
+            <if test="share.sessionId != null">
+                and css.session_id = #{share.sessionId}
+            </if>
+            <if test="share.userId != null">
+                and css.user_id = #{share.userId}
+            </if>
+            <if test="share.shareCode != null and share.shareCode != ''">
+                and css.share_code like concat('%', #{share.shareCode}, '%')
+            </if>
+            <if test="share.status != null">
+                and css.status = #{share.status}
+            </if>
+            <if test="share.createTime != null">
+                and css.create_time = #{share.createTime}
+            </if>
+        </where>
+        order by css.create_time desc
+    </select>
+
+    <select id="selectChatSessionShareList" resultMap="ChatSessionShareVoResult">
+        <include refid="selectChatSessionShareVoVo" />
+        <where>
+            <if test="share.id != null">
+                and css.id = #{share.id}
+            </if>
+            <if test="share.sessionId != null">
+                and css.session_id = #{share.sessionId}
+            </if>
+            <if test="share.userId != null">
+                and css.user_id = #{share.userId}
+            </if>
+            <if test="share.shareCode != null and share.shareCode != ''">
+                and css.share_code like concat('%', #{share.shareCode}, '%')
+            </if>
+            <if test="share.status != null">
+                and css.status = #{share.status}
+            </if>
+            <if test="share.createTime != null">
+                and css.create_time = #{share.createTime}
+            </if>
+        </where>
+        order by css.create_time desc
+    </select>
+
+    <select id="selectChatSessionShareByCode" resultMap="ChatSessionShareVoResult">
+        <include refid="selectChatSessionShareVoVo" />
+        and css.share_code = #{shareCode}
+    </select>
+
+    <update id="incrementViewCount">
+        update chat_session_share
+        set view_count = view_count + 1
+        where id = #{id}
+    </update>
+</mapper>
