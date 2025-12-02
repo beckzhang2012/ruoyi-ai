@@ -98,6 +98,27 @@ INSERT INTO `chat_config` VALUES (1779450794872414210, 'chat', 'apiHost', 'https
 INSERT INTO `chat_config` VALUES (1779497340548784129, 'pay', 'pid', '1000', '商户PID', 103, '2024-04-14 21:10:02', '1', '1', '2025-05-23 15:11:40', NULL, NULL, '0', NULL, 0);
 INSERT INTO `chat_config` VALUES (1779497340938854401, 'pay', 'key', 'xx', '商户密钥', 103, '2024-04-14 21:10:02', '1', '1', '2025-05-23 15:11:40', NULL, NULL, '0', NULL, 0);
 INSERT INTO `chat_config` VALUES (1779497341135986690, 'pay', 'payUrl', 'https://pay.pandarobot.chat/mapi.php', '支付地址', 103, '2024-04-14 21:10:02', '1', '1', '2025-05-23 15:11:40', NULL, NULL, '0', NULL, 0);
+
+-- ----------------------------
+-- Table structure for chat_session_share
+-- ----------------------------
+DROP TABLE IF EXISTS `chat_session_share`;
+CREATE TABLE `chat_session_share`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `session_id` bigint(20) UNSIGNED NOT NULL COMMENT '会话ID',
+  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '分享用户ID',
+  `share_code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分享码（唯一）',
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '查看密码（可选）',
+  `expire_time` datetime NULL DEFAULT NULL COMMENT '过期时间（可选，永久有效则为null）',
+  `view_count` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '查看次数',
+  `status` tinyint(4) NULL DEFAULT 1 COMMENT '分享状态：1-正常 0-已取消',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_share_code`(`share_code`) USING BTREE,
+  INDEX `idx_session_id`(`session_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话分享表' ROW_FORMAT = DYNAMIC;
 INSERT INTO `chat_config` VALUES (1779497341400227842, 'pay', 'notify_url', 'https://www.pandarobot.chat/pay/notifyUrl', '回调地址', 103, '2024-04-14 21:10:02', '1', '1', '2025-05-23 15:11:40', NULL, NULL, '0', NULL, 0);
 INSERT INTO `chat_config` VALUES (1779497341588971522, 'pay', 'return_url', 'https://www.pandarobot.chat/pay/returnUrl', '跳转通知', 103, '2024-04-14 21:10:02', '1', '1', '2024-04-28 17:46:31', NULL, NULL, '0', NULL, 0);
 INSERT INTO `chat_config` VALUES (1779513580331835394, 'mail', 'host', 'smtp.163.com', '主机地址', 103, '2024-04-14 22:14:34', '1', '1', '2025-05-23 15:12:45', NULL, NULL, '0', NULL, 0);
