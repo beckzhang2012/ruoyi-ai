@@ -94,6 +94,27 @@ CREATE TABLE `aihuman_info`  (
 INSERT INTO `aihuman_info` VALUES (1, '1', '1', '2025-09-26 18:02:00', '2025-09-26 18:02:02', '0');
 
 -- ----------------------------
+-- Table structure for chat_message_favorite
+-- ----------------------------
+DROP TABLE IF EXISTS `chat_message_favorite`;
+CREATE TABLE `chat_message_favorite`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` bigint NOT NULL COMMENT '收藏用户ID',
+  `message_id` bigint NOT NULL COMMENT '消息ID',
+  `session_id` bigint NOT NULL COMMENT '会话ID',
+  `session_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '会话名称',
+  `model_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '模型名称',
+  `message_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '收藏备注',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '收藏时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_user_message`(`user_id` ASC, `message_id` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE,
+  INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
+  INDEX `idx_model_name`(`model_name` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '聊天消息收藏表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Table structure for chat_config
 -- ----------------------------
 DROP TABLE IF EXISTS `chat_config`;

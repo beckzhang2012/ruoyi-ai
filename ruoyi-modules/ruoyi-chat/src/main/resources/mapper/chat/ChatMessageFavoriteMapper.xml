@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ruoyi.chat.mapper.ChatMessageFavoriteMapper">
+
+    <resultMap type="org.ruoyi.chat.domain.entity.ChatMessageFavorite" id="ChatMessageFavoriteResult">
+        <id     property="id"           column="id"           />
+        <result property="userId"       column="user_id"      />
+        <result property="messageId"    column="message_id"   />
+        <result property="sessionId"    column="session_id"   />
+        <result property="sessionName"  column="session_name" />
+        <result property="modelName"    column="model_name"   />
+        <result property="messageContent" column="message_content" />
+        <result property="remark"       column="remark"       />
+        <result property="createTime"   column="create_time"  />
+    </resultMap>
+
+    <sql id="selectChatMessageFavoriteVo">
+        select id, user_id, message_id, session_id, session_name, model_name, message_content, remark, create_time from chat_message_favorite
+    </sql>
+
+    <select id="selectMyFavoritePage" resultMap="ChatMessageFavoriteResult">
+        <include refid="selectChatMessageFavoriteVo"/>
+        where user_id = #{userId}
+        <if test="sessionId != null">
+            and session_id = #{sessionId}
+        </if>
+        <if test="modelName != null and modelName != ''">
+            and model_name like concat('%', #{modelName}, '%')
+        </if>
+        <if test="searchKey != null and searchKey != ''">
+            and (message_content like concat('%', #{searchKey}, '%') or remark like concat('%', #{searchKey}, '%'))
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectByUserIdAndMessageId" parameterType="map" resultMap="ChatMessageFavoriteResult">
+        <include refid="selectChatMessageFavoriteVo"/>
+        where user_id = #{userId} and message_id = #{messageId}
+    </select>
+
+</mapper>
