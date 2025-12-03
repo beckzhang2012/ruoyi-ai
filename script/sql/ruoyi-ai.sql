@@ -3151,4 +3151,25 @@ CREATE TABLE `t_workflow_runtime_node`  (
 -- Records of t_workflow_runtime_node
 -- ----------------------------
 
+CREATE TABLE `ai_usage_statistics`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `stat_date` date NOT NULL COMMENT '统计日期',
+  `user_id` bigint NULL DEFAULT NULL COMMENT '用户ID',
+  `user_name` varchar(50) NULL DEFAULT NULL COMMENT '用户名称',
+  `model_name` varchar(100) NULL DEFAULT NULL COMMENT '模型名称',
+  `chat_count` int NULL DEFAULT 0 COMMENT '对话次数',
+  `message_count` int NULL DEFAULT 0 COMMENT '消息数量',
+  `prompt_tokens` bigint NULL DEFAULT 0 COMMENT 'Prompt Token消耗',
+  `completion_tokens` bigint NULL DEFAULT 0 COMMENT 'Completion Token消耗',
+  `total_tokens` bigint NULL DEFAULT 0 COMMENT '总Token消耗',
+  `total_cost` decimal(10, 6) NULL DEFAULT 0.000000 COMMENT '总费用',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `idx_stat_date_user_model`(`stat_date` ASC, `user_id` ASC, `model_name` ASC) USING BTREE,
+  INDEX `idx_stat_date`(`stat_date` ASC) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_model_name`(`model_name` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI使用统计数据表';
+
 SET FOREIGN_KEY_CHECKS = 1;

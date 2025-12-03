@@ -10,6 +10,8 @@
         <result property="modelName"      column="model_name"     />
         <result property="conversationCount" column="conversation_count" />
         <result property="messageCount"   column="message_count"  />
+        <result property="promptTokens"   column="prompt_tokens"  />
+        <result property="completionTokens" column="completion_tokens" />
         <result property="totalTokens"    column="total_tokens"   />
         <result property="totalCost"      column="total_cost"     />
         <result property="createTime"     column="create_time"    />
@@ -17,7 +19,8 @@
     </resultMap>
 
     <sql id="selectAiUsageStatisticsVo">
-        select id, stat_date, stat_type, user_id, model_name, conversation_count, message_count, total_tokens, total_cost, create_time, update_time from ai_usage_statistics
+        select id, stat_date, stat_type, user_id, model_name, conversation_count, message_count,
+               prompt_tokens, completion_tokens, total_tokens, total_cost, create_time, update_time from ai_usage_statistics
     </sql>
 
     <sql id="queryConditions">
@@ -55,42 +58,48 @@
     <!-- 按用户统计使用情况 -->
     <select id="selectUserUsageStatistics" resultType="map">
         SELECT 
-            user_id,
-            COUNT(DISTINCT session_id) as conversation_count,
-            COUNT(id) as message_count,
-            SUM(total_tokens) as total_tokens,
-            SUM(deduct_cost) as total_cost
-        FROM chat_message
+            c.user_id as userId,
+            u.nick_name as userName,
+            COUNT(DISTINCT c.session_id) as chatCount,
+            COUNT(c.id) as messageCount,
+            SUM(c.prompt_tokens) as promptTokens,
+            SUM(c.completion_tokens) as completionTokens,
+            SUM(c.total_tokens) as totalTokens,
+            SUM(c.deduct_cost) as totalCost
+        FROM chat_message c
+        left join sys_user u on c.user_id = u.user_id
         <where>
             create_time >= #{query.startTime}
             AND create_time <![CDATA[ < ]]> DATE_ADD(#{query.endTime}, INTERVAL 1 DAY)
             <if test="query.userId != null">
-                AND user_id = #{query.userId}
+                AND c.user_id = #{query.userId}
             </if>
         </where>
-        GROUP BY user_id
-        ORDER BY conversation_count desc
+        GROUP BY c.user_id, u.nick_name
+        ORDER BY totalTokens desc
     </select>
 
     <!-- 按模型统计使用情况 -->
     <select id="selectModelUsageStatistics" resultType="map">
         SELECT 
-            model_name,
-            COUNT(DISTINCT session_id) as conversation_count,
-            COUNT(id) as message_count,
-            SUM(total_tokens) as total_tokens,
-            SUM(deduct_cost) as total_cost
-        FROM chat_message
+            c.model as modelName,
+            COUNT(DISTINCT c.session_id) as chatCount,
+            COUNT(c.id) as messageCount,
+            SUM(c.prompt_tokens) as promptTokens,
+            SUM(c.completion_tokens) as completionTokens,
+            SUM(c.total_tokens) as totalTokens,
+            SUM(c.deduct_cost) as totalCost
+        FROM chat_message c
         <where>
-            model_name is not null
+            c.model is not null
             AND create_time >= #{query.startTime}
             AND create_time <![CDATA[ < ]]> DATE_ADD(#{query.endTime}, INTERVAL 1 DAY)
             <if test="query.modelName != null and query.modelName != ''">
-                AND model_name = #{query.modelName}
+                AND c.model like concat('%', #{query.modelName}, '%')
             </if>
         </where>
-        GROUP BY model_name
-        ORDER BY conversation_count desc
+        GROUP BY c.model
+        ORDER BY totalTokens desc
     </select>
 
     <!-- 统计用户对话次数 -->
@@ -117,16 +126,18 @@
     <!-- 统计模型使用趋势 -->
     <select id="selectModelUsageTrend" resultType="map">
         SELECT 
-            DATE(create_time) as stat_date,
-            model_name,
-            COUNT(DISTINCT session_id) as conversation_count,
-            SUM(total_tokens) as total_tokens,
-            SUM(deduct_cost) as total_cost
-        FROM chat_message
+            DATE(create_time) as statDate,
+            c.model as modelName,
+            COUNT(DISTINCT c.session_id) as chatCount,
+            SUM(c.prompt_tokens) as promptTokens,
+            SUM(c.completion_tokens) as completionTokens,
+            SUM(c.total_tokens) as totalTokens,
+            SUM(c.deduct_cost) as totalCost
+        FROM chat_message c
         <where>
-            model_name is not null
+            c.model is not null
             <if test="query.modelName != null and query.modelName != ''">
-                AND model_name = #{query.modelName}
+                AND c.model like concat('%', #{query.modelName}, '%')
             </if>
             <if test="query.startTime != null">
                 AND create_time >= #{query.startTime}
@@ -135,8 +146,37 @@
                 AND create_time <![CDATA[ < ]]> DATE_ADD(#{query.endTime}, INTERVAL 1 DAY)
             </if>
         </where>
-        GROUP BY DATE(create_time), model_name
-        ORDER BY stat_date, model_name
+        GROUP BY DATE(create_time), c.model
+        ORDER BY statDate desc, modelName
     </select>
+
+    <!-- 从chat_message表同步每日统计数据 -->
+    <insert id="statDailyData">
+        insert into ai_usage_statistics
+        (stat_date, stat_type, user_id, model_name, conversation_count, message_count,
+         prompt_tokens, completion_tokens, total_tokens, total_cost)
+        select
+            date(c.create_time) as stat_date,
+            '1' as stat_type,
+            c.user_id,
+            c.model,
+            count(distinct c.session_id) as conversation_count,
+            count(c.id) as message_count,
+            sum(c.prompt_tokens) as prompt_tokens,
+            sum(c.completion_tokens) as completion_tokens,
+            sum(c.total_tokens) as total_tokens,
+            sum(c.deduct_cost) as total_cost
+        from chat_message c
+        where date(c.create_time) = #{statDate}
+        group by date(c.create_time), c.user_id, c.model
+        on duplicate key update
+            conversation_count = values(conversation_count),
+            message_count = values(message_count),
+            prompt_tokens = values(prompt_tokens),
+            completion_tokens = values(completion_tokens),
+            total_tokens = values(total_tokens),
+            total_cost = values(total_cost),
+            update_time = current_timestamp
+    </insert>
 
 </mapper>

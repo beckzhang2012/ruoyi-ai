@@ -60,6 +60,16 @@ public class AiUsageStatistics implements Serializable {
     private Integer messageCount;
 
     /**
+     * Prompt Token消耗
+     */
+    private Long promptTokens;
+
+    /**
+     * Completion Token消耗
+     */
+    private Long completionTokens;
+
+    /**
      * 总token数
      */
     private Long totalTokens;
